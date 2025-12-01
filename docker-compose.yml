@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: zookeeper:3.9
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=dev
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_DB=devdb
+    ports:
+      - "5432:5432"
+
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile
+    image: order-service:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - kafka
+
+  product-service:
+    build:
+      context: ./services/product-service
+      dockerfile: Dockerfile
+    image: product-service:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+      - kafka
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    image: notification-service:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890
+    ports:
+      - "8084:8084"
+    depends_on:
+      - postgres
+      - kafka
+
+  inventory-service:
+    build:
+      context: ./services/inventory-service
+      dockerfile: Dockerfile
+    image: inventory-service:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890
+    ports:
+      - "8085:8085"
+    depends_on:
+      - postgres
+      - kafka
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    image: auth-service:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890
+    ports:
+      - "8086:8086"
+    depends_on:
+      - postgres
+
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    image: user-service:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890
+    ports:
+      - "8087:8087"
+    depends_on:
+      - postgres
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    image: api-gateway:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - order-service
+      - product-service
+      - notification-service
+      - inventory-service
+      - auth-service
+      - user-service
+
+networks:
+  default:
+    driver: bridge

@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/devdb?TimeZone=UTC
+    username: dev
+    password: dev
+
+  kafka:
+    bootstrap-servers: kafka:29092
+
+product-service:
+  url: http://product-service:8083
+
+inventory-service:
+  url: http://inventory-service:8085

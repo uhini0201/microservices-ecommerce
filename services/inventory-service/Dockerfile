@@ -1,0 +1,12 @@
+FROM eclipse-temurin:17-jdk-focal AS build
+WORKDIR /app
+RUN apt-get update && apt-get install -y maven
+COPY pom.xml .
+COPY src ./src
+RUN mvn -B -DskipTests package
+
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8085
+ENTRYPOINT ["java", "-Duser.timezone=UTC", "-jar", "app.jar", "--spring.profiles.active=docker"]

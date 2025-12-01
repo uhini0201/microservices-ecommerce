@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/devdb?TimeZone=UTC
+    username: dev
+    password: dev
+
+  kafka:
+    bootstrap-servers: localhost:9092

@@ -1,0 +1,25 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: user-service
+  
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRrZXl0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmdmb3JIUzI1NmVuY3J5cHRpb24=}
+
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO
+        security: DEBUG

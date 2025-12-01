@@ -1,0 +1,14 @@
+# Stage 1: Build
+FROM eclipse-temurin:17-jdk-focal AS build
+WORKDIR /app
+RUN apt-get update && apt-get install -y maven
+COPY pom.xml ./
+COPY src ./src
+RUN mvn -B -DskipTests package
+
+# Stage 2: Runtime
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8086
+ENTRYPOINT ["java", "-jar", "app.jar"]

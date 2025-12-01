@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/devdb?TimeZone=UTC
+    username: dev
+    password: dev
+    driver-class-name: org.postgresql.Driver
+  
+  kafka:
+    bootstrap-servers: kafka:29092

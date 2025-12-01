@@ -1,0 +1,27 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: notification-service
+  
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  
+  kafka:
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRrZXl0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmdmb3JIUzI1NmVuY3J5cHRpb24=}
