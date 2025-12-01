@@ -162,7 +162,24 @@ Write-Host ""
 
 # Health check for key services
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Step 2: Health Check" -ForegroundColor Cyan
+Write-Host "  Step 2: Starting Live Log Monitoring" -ForegroundColor Cyan
+Write-Host "================================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Start live logging in background
+$logScriptPath = Join-Path $scriptPath "live-logs.ps1"
+if (Test-Path $logScriptPath) {
+    Write-Host "Starting live log monitoring in background..." -ForegroundColor Yellow
+    $global:logJob = Start-Job -FilePath $logScriptPath -ArgumentList @{UpdateInterval=2; TailLines=100}
+    Write-Host "✓ Live logging started (logs/live/)" -ForegroundColor Green
+    Write-Host "  View logs: Get-Content logs/live/<service>.log -Tail 20 -Wait" -ForegroundColor Gray
+} else {
+    Write-Host "⚠ live-logs.ps1 not found, skipping live logging" -ForegroundColor Yellow
+}
+Write-Host ""
+
+Write-Host "================================================" -ForegroundColor Cyan
+Write-Host "  Step 3: Waiting for Services to be Ready" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -196,7 +213,7 @@ foreach ($service in $services) {
 # Start frontend only if no specific service was requested
 if ($Service -eq "") {
     Write-Host "================================================" -ForegroundColor Cyan
-    Write-Host "  Step 3: Starting React Frontend" -ForegroundColor Cyan
+    Write-Host "  Step 4: Starting React Frontend" -ForegroundColor Cyan
     Write-Host "================================================" -ForegroundColor Cyan
     Write-Host ""
 
@@ -245,8 +262,20 @@ if ($Service -eq "") {
     Write-Host "================================================" -ForegroundColor Cyan
     Write-Host ""
 
-    # Start frontend (this will run in foreground)
-    npm start
+    # Register cleanup on exit
+    try {
+        # Start frontend (this will run in foreground)
+        npm start
+    } finally {
+        # Stop live logging when frontend exits
+        if ($global:logJob) {
+            Write-Host ""
+            Write-Host "Stopping live log monitoring..." -ForegroundColor Yellow
+            Stop-Job $global:logJob -ErrorAction SilentlyContinue
+            Remove-Job $global:logJob -ErrorAction SilentlyContinue
+            Write-Host "✓ Live logging stopped" -ForegroundColor Green
+        }
+    }
 } else {
     Write-Host ""
     Write-Host "================================================" -ForegroundColor Cyan
@@ -257,19 +286,10 @@ if ($Service -eq "") {
     Write-Host "View logs: docker-compose logs -f $Service-service" -ForegroundColor Cyan
     Write-Host "Stop service: docker-compose stop $Service-service" -ForegroundColor Cyan
     Write-Host ""
+    
+    # Keep log monitoring running for specific service
+    if ($global:logJob) {
+        Write-Host "Live logging is running in background" -ForegroundColor Cyan
+        Write-Host "To stop logging: Stop-Job -Id $($global:logJob.Id); Remove-Job -Id $($global:logJob.Id)" -ForegroundColor Gray
+    }
 }
-
-# This script will keep running until Ctrl+C is pressed (if frontend started)
-
-Write-Host "Starting React development server..." -ForegroundColor Yellow
-Write-Host "Note: Frontend will open automatically at http://localhost:3000" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Press Ctrl+C to stop all services" -ForegroundColor Cyan
-Write-Host "================================================" -ForegroundColor Cyan
-Write-Host ""
-
-# Start frontend (this will run in foreground)
-npm start
-
-# This script will keep running until Ctrl+C is pressed

@@ -63,9 +63,31 @@ echo "================================================"
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "service|postgres|kafka|redis|gateway"
 echo ""
 
+# Start live logging in background
+echo "================================================"
+echo "  Step 2: Starting Live Log Monitoring"
+echo "================================================"
+echo ""
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_SCRIPT="$SCRIPT_DIR/live-logs.sh"
+
+if [ -f "$LOG_SCRIPT" ]; then
+    echo "Starting live log monitoring in background..."
+    chmod +x "$LOG_SCRIPT"
+    nohup "$LOG_SCRIPT" 2 100 > /dev/null 2>&1 &
+    LOG_PID=$!
+    echo "$LOG_PID" > "$SCRIPT_DIR/.live-logs.pid"
+    echo -e "${GREEN}✓ Live logging started (logs/live/)${NC}"
+    echo -e "  View logs: tail -f logs/live/<service>.log"
+else
+    echo -e "${YELLOW}⚠ live-logs.sh not found, skipping live logging${NC}"
+fi
+echo ""
+
 # Health check for key services
 echo "================================================"
-echo "  Step 2: Health Check"
+echo "  Step 3: Health Check"
 echo "================================================"
 echo ""
 
@@ -99,9 +121,24 @@ for service in "${services[@]}"; do
 done
 echo ""
 
+# Cleanup function
+cleanup() {
+    echo ""
+    echo "Stopping live log monitoring..."
+    if [ -f "$SCRIPT_DIR/.live-logs.pid" ]; then
+        LOG_PID=$(cat "$SCRIPT_DIR/.live-logs.pid")
+        kill $LOG_PID 2>/dev/null || true
+        rm "$SCRIPT_DIR/.live-logs.pid"
+        echo -e "${GREEN}✓ Live logging stopped${NC}"
+    fi
+    exit 0
+}
+
+trap cleanup SIGINT SIGTERM
+
 # Start frontend
 echo "================================================"
-echo "  Step 3: Starting React Frontend"
+echo "  Step 4: Starting React Frontend"
 echo "================================================"
 echo ""
 

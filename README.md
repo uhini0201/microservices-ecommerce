@@ -19,10 +19,20 @@ chmod +x start.sh
 
 This will:
 1. ✅ Start all Docker microservices (API Gateway + 6 services)
-2. ✅ Wait for services to initialize
-3. ✅ Perform health checks
-4. ✅ Start React frontend
-5. ✅ Open browser at `http://localhost:3000`
+2. ✅ **Auto-start live log monitoring** (updates every 2 seconds to `logs/live/`)
+3. ✅ Wait for services to initialize
+4. ✅ Perform health checks
+5. ✅ Start React frontend
+6. ✅ Open browser at `http://localhost:3000`
+
+**View logs while running:**
+```powershell
+# Windows
+Get-Content logs/live/api-gateway.log -Tail 20 -Wait
+
+# Linux/Mac
+tail -f logs/live/api-gateway.log
+```
 
 ### Shutdown
 

@@ -50,3 +50,11 @@ postgres-data/
 kafka-data/
 zookeeper-data/
 redis-data/
+
+# Logs
+logs/**/*.log
+logs/**/*.txt
+logs/live/
+logs/snapshots/
+!logs/README.md
+.live-logs.pid
