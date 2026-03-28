@@ -190,7 +190,13 @@ management:
 
 # Logging
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Kolkata} [%thread] %-5level %logger{36}.%M(%F:%L) - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Kolkata} [%thread] %-5level %logger{36}.%M(%F:%L) - %msg%n"
   level:
     root: INFO
     org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
     com.example.apigateway: DEBUG
+    reactor.netty: INFO

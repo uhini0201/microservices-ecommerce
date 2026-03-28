@@ -43,18 +43,16 @@ const CartPage: React.FC = () => {
     setSuccess('');
 
     try {
-      // Create orders for each cart item
-      const orderPromises = cart.map((item) =>
-        orderService.create({
-          customer: user?.username || 'guest',
+      // Create a single order with all cart items
+      await orderService.create({
+        customer: user?.username || 'guest',
+        items: cart.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
-        })
-      );
+        })),
+      });
 
-      await Promise.all(orderPromises);
-
-      setSuccess(`Successfully placed ${cart.length} order(s)!`);
+      setSuccess('Order placed successfully!');
       clearCart();
 
       // Redirect to orders page after 2 seconds
@@ -120,7 +118,7 @@ const CartPage: React.FC = () => {
                     </Typography>
                   )}
                   <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                    ${item.product.price.toFixed(2)}
+                    ₹{item.product.price.toFixed(2)}
                   </Typography>
                 </Box>
 
@@ -136,7 +134,7 @@ const CartPage: React.FC = () => {
                     size="small"
                   />
                   <Typography variant="body1" sx={{ minWidth: 80, textAlign: 'right' }}>
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    ₹{(item.product.price * item.quantity).toFixed(2)}
                   </Typography>
                   <IconButton
                     color="error"
@@ -177,7 +175,7 @@ const CartPage: React.FC = () => {
                     {item.product.name} × {item.quantity}
                   </Typography>
                   <Typography variant="body2">
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    ₹{(item.product.price * item.quantity).toFixed(2)}
                   </Typography>
                 </Box>
               ))}
@@ -188,7 +186,7 @@ const CartPage: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6">Total</Typography>
               <Typography variant="h6" color="primary">
-                ${getTotalPrice().toFixed(2)}
+                ₹{getTotalPrice().toFixed(2)}
               </Typography>
             </Box>
 

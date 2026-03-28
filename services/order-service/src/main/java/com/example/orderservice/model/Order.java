@@ -2,6 +2,8 @@ package com.example.orderservice.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -13,28 +15,19 @@ public class Order {
 
     private String customer;
 
-    private Long productId;
-
-    private String productName;
-
-    private Integer quantity;
-
-    private Double unitPrice;
-
     private Double totalAmount;
 
     private String status;
 
     private Instant createdAt = Instant.now();
 
+    @Transient
+    private List<OrderItem> items = new ArrayList<>();
+
     public Order() {}
 
-    public Order(String customer, Long productId, String productName, Integer quantity, Double unitPrice, Double totalAmount, String status) {
+    public Order(String customer, Double totalAmount, String status) {
         this.customer = customer;
-        this.productId = productId;
-        this.productName = productName;
-        this.quantity = quantity;
-        this.unitPrice = unitPrice;
         this.totalAmount = totalAmount;
         this.status = status;
     }
@@ -47,18 +40,6 @@ public class Order {
     public String getCustomer() { return customer; }
     public void setCustomer(String customer) { this.customer = customer; }
 
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
-
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
-
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
-
-    public Double getUnitPrice() { return unitPrice; }
-    public void setUnitPrice(Double unitPrice) { this.unitPrice = unitPrice; }
-
     public Double getTotalAmount() { return totalAmount; }
     public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
 
@@ -67,4 +48,7 @@ public class Order {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public List<OrderItem> getItems() { return items; }
+    public void setItems(List<OrderItem> items) { this.items = items; }
 }

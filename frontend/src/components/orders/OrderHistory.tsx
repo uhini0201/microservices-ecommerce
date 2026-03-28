@@ -31,7 +31,6 @@ const OrderHistory: React.FC = () => {
     try {
       setLoading(true);
       const data = await orderService.getUserOrders();
-      // Sort by creation date (newest first)
       const sorted = data.sort((a, b) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -114,28 +113,19 @@ const OrderHistory: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <ReceiptIcon color="action" />
                   <Typography variant="h6">Order #{order.id}</Typography>
-                  <Chip
-                    label={order.status}
-                    color={getStatusColor(order.status) as any}
-                    size="small"
-                  />
                 </Box>
                 <Typography variant="body2" color="text.secondary">
                   {formatDate(order.createdAt)}
                 </Typography>
               </Box>
-              <Typography variant="h6" color="primary">
-                ${order.totalAmount.toFixed(2)}
-              </Typography>
-            </Box>
-
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="body1">
-                <strong>Product:</strong> {order.productName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Quantity: {order.quantity} × ${order.unitPrice.toFixed(2)}
-              </Typography>
+              <Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                  Total Items: {order.itemCount || order.items?.length || 0}
+                </Typography>
+                <Typography variant="h6" color="primary">
+                  ₹{order.totalAmount.toFixed(2)}
+                </Typography>
+              </Box>
             </Box>
 
             <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
@@ -145,6 +135,14 @@ const OrderHistory: React.FC = () => {
                 onClick={() => navigate(`/orders/${order.id}`)}
               >
                 View Details
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<ReceiptIcon />}
+                onClick={() => navigate(`/orders/${order.id}/invoice`)}
+              >
+                View Invoice
               </Button>
             </Box>
           </Paper>

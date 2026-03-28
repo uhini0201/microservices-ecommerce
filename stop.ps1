@@ -12,17 +12,16 @@ Set-Location $scriptPath
 
 # Stop frontend if running
 Write-Host "Stopping frontend (if running)..." -ForegroundColor Yellow
-$frontendProcesses = Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object {
-    $_.Path -like "*\node.exe" -and 
-    $_.CommandLine -like "*react-scripts*"
-}
 
-if ($frontendProcesses) {
-    Write-Host "Found React development server process(es). Stopping..." -ForegroundColor Yellow
-    $frontendProcesses | Stop-Process -Force
+# Check for both development server (react-scripts) and production server (serve)
+$nodeProcesses = Get-Process -Name "node" -ErrorAction SilentlyContinue
+
+if ($nodeProcesses) {
+    Write-Host "Found Node.js process(es). Stopping all..." -ForegroundColor Yellow
+    $nodeProcesses | Stop-Process -Force
     Write-Host "✓ Frontend stopped" -ForegroundColor Green
 } else {
-    Write-Host "⚠ No running frontend process found" -ForegroundColor Yellow
+    Write-Host "⚠ No running Node.js processes found" -ForegroundColor Yellow
 }
 Write-Host ""
 

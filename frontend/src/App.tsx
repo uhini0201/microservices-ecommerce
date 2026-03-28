@@ -13,6 +13,8 @@ import RegisterPage from './components/auth/RegisterPage';
 import ProductList from './components/products/ProductList';
 import CartPage from './components/cart/CartPage';
 import OrderHistory from './components/orders/OrderHistory';
+import OrderDetails from './components/orders/OrderDetails';
+import InvoicePage from './components/orders/InvoicePage';
 import UserProfile from './components/profile/UserProfile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -36,6 +38,8 @@ function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/orders" element={<OrderHistory />} />
+                  <Route path="/orders/:id" element={<OrderDetails />} />
+                  <Route path="/orders/:id/invoice" element={<InvoicePage />} />
                   <Route path="/profile" element={<UserProfile />} />
                 </Route>
 

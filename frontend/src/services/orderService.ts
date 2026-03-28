@@ -1,5 +1,5 @@
 import apiClient from './api';
-import { Order, OrderCreateRequest } from '../types/order.types';
+import { Order, OrderCreateRequest, Invoice } from '../types/order.types';
 
 export const orderService = {
   /**
@@ -25,6 +25,22 @@ export const orderService = {
     // Note: In the future, backend should filter by logged-in user
     // For now, returns all orders
     const response = await apiClient.get<Order[]>('/orders');
+    return response.data;
+  },
+
+  /**
+   * Get invoice for an order
+   */
+  getInvoice: async (id: number): Promise<Invoice> => {
+    const response = await apiClient.get<Invoice>(`/orders/${id}/invoice`);
+    return response.data;
+  },
+
+  /**
+   * Cancel an order
+   */
+  cancelOrder: async (id: number): Promise<Order> => {
+    const response = await apiClient.put<Order>(`/orders/${id}/cancel`);
     return response.data;
   },
 };

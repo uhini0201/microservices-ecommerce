@@ -64,7 +64,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="h5" color="primary" fontWeight="bold">
-            ${product.price.toFixed(2)}
+            ₹{product.price.toFixed(2)}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <InventoryIcon fontSize="small" color="action" />

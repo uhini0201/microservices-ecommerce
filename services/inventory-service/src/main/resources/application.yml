@@ -28,10 +28,16 @@ jwt:
   secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRrZXl0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmdmb3JIUzI1NmVuY3J5cHRpb24=}
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Kolkata} [%thread] %-5level %logger{36}.%M(%F:%L) - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Kolkata} [%thread] %-5level %logger{36}.%M(%F:%L) - %msg%n"
   level:
+    root: INFO
+    com.example: DEBUG
     org:
       springframework:
         web: INFO
         security: DEBUG
       hibernate:
         SQL: DEBUG
+        type.descriptor.sql.BasicBinder: TRACE

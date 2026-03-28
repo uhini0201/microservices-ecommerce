@@ -1,35 +1,28 @@
 package com.example.orderservice.dto;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
 
 public class OrderRequest {
 
     @NotBlank
     private String customer;
 
-    @NotNull
-    private Long productId;
-
-    @NotNull
-    @Min(1)
-    private Integer quantity;
+    @NotEmpty
+    private List<OrderItemRequest> items;
 
     public OrderRequest() {}
 
-    public OrderRequest(String customer, Long productId, Integer quantity) {
+    public OrderRequest(String customer, List<OrderItemRequest> items) {
         this.customer = customer;
-        this.productId = productId;
-        this.quantity = quantity;
+        this.items = items;
     }
 
     public String getCustomer() { return customer; }
     public void setCustomer(String customer) { this.customer = customer; }
 
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
-
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    public List<OrderItemRequest> getItems() { return items; }
+    public void setItems(List<OrderItemRequest> items) { this.items = items; }
 }
+

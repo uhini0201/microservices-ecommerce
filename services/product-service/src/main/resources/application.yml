@@ -21,3 +21,18 @@ spring:
 # JWT Configuration
 jwt:
   secret: ${JWT_SECRET:myVerySecureSecretKeyForJWT1234567890123456789012345678901234567890}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Kolkata} [%thread] %-5level %logger{36}.%M(%F:%L) - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Kolkata} [%thread] %-5level %logger{36}.%M(%F:%L) - %msg%n"
+  level:
+    root: INFO
+    com.example: DEBUG
+    org:
+      springframework:
+        web: INFO
+        security: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type.descriptor.sql.BasicBinder: TRACE

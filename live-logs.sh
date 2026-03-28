@@ -62,6 +62,12 @@ cleanup() {
     echo -e "${YELLOW}  LOG MONITORING STOPPED${NC}"
     echo -e "${CYAN}========================================${NC}\n"
     
+    # Kill all background log streaming processes
+    echo -e "${YELLOW}Stopping ${#PIDS[@]} log streaming processes...${NC}"
+    for pid in "${PIDS[@]}"; do
+        kill "$pid" 2>/dev/null || true
+    done
+    
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
     HOURS=$((DURATION / 3600))
@@ -69,8 +75,7 @@ cleanup() {
     SECONDS=$((DURATION % 60))
     
     echo -e "${YELLOW}Summary:${NC}"
-    echo -e "  Total iterations: ${ITERATION}"
-    printf "  Duration: %02d:%02d:%02d\n" $HOURS $MINUTES $SECONDS
+    printf "  Total duration: %02d:%02d:%02d\n" $HOURS $MINUTES $SECONDS
     echo -e "  ${GREEN}Logs saved to: ${LIVE_LOGS_DIR}${NC}\n"
     
     # Create timestamped backup
@@ -81,7 +86,7 @@ cleanup() {
     mkdir -p "$SNAPSHOT_DIR"
     
     echo -e "${YELLOW}Creating snapshot backup...${NC}"
-    cp "$LIVE_LOGS_DIR"/*.log "$SNAPSHOT_DIR/" 2>/dev/null
+    cp "$LIVE_LOGS_DIR"/*.log "$SNAPSHOT_DIR/" 2>/dev/null || true
     
     echo -e "  ${GREEN}Snapshot saved: logs/snapshots/$TIMESTAMP/${NC}\n"
     exit 0
@@ -89,27 +94,43 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
+# Start background log streaming for each service
+PIDS=()
+
+for comp in "${ALL_COMPONENTS[@]}"; do
+    CONTAINER_NAME="microservices-project-${comp}-1"
+    LOG_FILE="$LIVE_LOGS_DIR/${comp}.log"
+    
+    # Start continuous log streaming in background
+    docker logs --follow --tail 100 "$CONTAINER_NAME" > "$LOG_FILE" 2>&1 &
+    PIDS+=($!)
+done
+
+echo -e "${GREEN}Started ${#PIDS[@]} log streaming processes${NC}\n"
+
+# Monitor and show status
 while true; do
     ITERATION=$((ITERATION + 1))
     CURRENT_TIME=$(date +"%H:%M:%S")
     
-    for comp in "${ALL_COMPONENTS[@]}"; do
-        CONTAINER_NAME="microservices-project-${comp}-1"
-        LOG_FILE="$LIVE_LOGS_DIR/${comp}.log"
-        
-        # Get latest logs and save to file
-        docker logs --tail $TAIL_LINES "$CONTAINER_NAME" > "$LOG_FILE" 2>&1 || true
-    done
-    
-    # Show status every 5 iterations
-    if [ $((ITERATION % 5)) -eq 0 ]; then
+    # Show status every 10 iterations
+    if [ $((ITERATION % 10)) -eq 0 ]; then
         ELAPSED_TIME=$(($(date +%s) - START_TIME))
         ELAPSED_HOURS=$((ELAPSED_TIME / 3600))
         ELAPSED_MINUTES=$(((ELAPSED_TIME % 3600) / 60))
         ELAPSED_SECONDS=$((ELAPSED_TIME % 60))
-        printf "${GRAY}[%s] Updated all logs (iteration: %d, elapsed: %02d:%02d:%02d)${NC}\n" \
-            "$CURRENT_TIME" "$ITERATION" "$ELAPSED_HOURS" "$ELAPSED_MINUTES" "$ELAPSED_SECONDS"
+        
+        # Count running processes
+        RUNNING=0
+        for pid in "${PIDS[@]}"; do
+            if kill -0 "$pid" 2>/dev/null; then
+                RUNNING=$((RUNNING + 1))
+            fi
+        done
+        
+        printf "${GRAY}[%s] Live logging active - %d/%d streams running (elapsed: %02d:%02d:%02d)${NC}\n" \
+            "$CURRENT_TIME" "$RUNNING" "${#PIDS[@]}" "$ELAPSED_HOURS" "$ELAPSED_MINUTES" "$ELAPSED_SECONDS"
     fi
     
-    sleep $UPDATE_INTERVAL
+    sleep 1
 done
